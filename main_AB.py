@@ -8,6 +8,7 @@ import time
 import openmatrix as omx
 import xarray
 import os
+import pickle
 
 # Set path to current folder.
 abspath = os.path.abspath(__file__)
@@ -47,6 +48,8 @@ tt_matrix = np.delete(tt_matrix, slice(7965,7978), axis=0)
 tt_matrix = np.delete(tt_matrix, slice(7965,7978), axis=1)
 tt_matrix[np.diag_indices(7965,ndim=2)] = 0 # forces the travel times for internal trips to be 0.
 mapping = OMXfile.mapping('NO')
+Zone_IDs = np.array(list(mapping.keys()))
+Zone_IDs = np.delete(Zone_IDs, slice (7965,7978))
 OMXfile.close()
 
 
@@ -67,13 +70,17 @@ veh_types = GenPar.index
 
 
 # initialize the output
-Veh = xarray.DataArray(np.empty((N,2,10), dtype=object), coords = [range(0,N), veh_types, branches], dims = ["zones", "veh_types", "branches"])
+Veh = xarray.DataArray(np.empty((N,2,10), dtype=object), coords = [Zone_IDs, veh_types, branches], dims = ["zones", "veh_types", "branches"])
 
 # Apply the model, i.e. multiply the vehicle rates by the corresponding explanatory variable for each vehicle type and each branch (and each zone).
 for veh_type in veh_types:
     for branch in branches:
         Veh.loc[:, veh_type, branch] = ZoneStats.loc[:, branch] * GenPar.loc[veh_type, branch]
 print('Vehicle generation: done')
+# save output for later analysis
+with open('Vehicles.pickle', 'wb') as handle:
+    pickle.dump(Veh,file = handle, protocol = -1)
+
 
 ####### Vehicle Purpose
 # Mapping used for convenience purpose, because vehicles generated for the branch "Pop" (i.e. privately-owned vehicles) use the parameters estimated for vehicles whose branch is ``unknown''.
@@ -92,10 +99,10 @@ purposes = PurposePar.columns[2:] # list of purposes
 ActiveShares = pd.read_csv('parameters/ShareActive.csv', sep=";", index_col=0)
 for veh_type in veh_types:
     for branch in branches:
-        Veh.loc[:, veh_type, branch] = Veh.loc[:, veh_type, branch] * ActiveShares.loc[map_branch_estimation[branch],'Share Active']
+        Veh.loc[:, veh_type, branch] = Veh.loc[:, veh_type, branch] * ActiveShares.loc[map_branch_estimation[branch],'Mo_Fr'] # either use the column 'Mo_Fr' (monday-friday) or 'Mo_Su' (monday-sunday)
 
 # initialize the output
-VehByPurpose=xarray.DataArray(np.empty((N,2,10,3), dtype=object), coords = [range(0,N), veh_types, branches, purposes], dims = ["zones", "veh_types", "branches", "purposes"])
+VehByPurpose=xarray.DataArray(np.empty((N,2,10,3), dtype=object), coords = [Zone_IDs, veh_types, branches, purposes], dims = ["zones", "veh_types", "branches", "purposes"])
 # Distribute the active vehicles between the 3 purposes
 for i in PurposePar.index:
     for purpose in purposes:
@@ -105,7 +112,7 @@ print('Vehicle Purpose: done')
 ####### Number of tours
 ToursPar = pd.read_csv('parameters/NumberOfTours.csv', sep=";")
 # initialize the output
-Tours_df = xarray.DataArray(np.empty((N,2,10,3), dtype=object), coords = [range(0,N), veh_types, branches, purposes], dims = ["zones", "veh_types", "branches", "purposes"])
+Tours_df = xarray.DataArray(np.empty((N,2,10,3), dtype=object), coords = [Zone_IDs, veh_types, branches, purposes], dims = ["zones", "veh_types", "branches", "purposes"])
 for i in ToursPar.index:
     if ToursPar.loc[i, 'NOGA_1'] in map_branch_estimation.values(): #to discard parameters corresponding to branches for which no vehicle is generated.
         Tours_df.loc[:, ToursPar.loc[i, 'CurbWeight'], inv_map[ToursPar.loc[i, 'NOGA_1']], ToursPar.loc[i, 'Purpose']] = VehByPurpose.loc[:, ToursPar.loc[i, 'CurbWeight'], inv_map[ToursPar.loc[i, 'NOGA_1']], ToursPar.loc[i, 'Purpose']] * ToursPar.loc[i, 'AvgNbTours']
@@ -123,7 +130,7 @@ print('Correction: done')
 
 ####### Conversion to segments for Tour Building
 EndTourPar = pd.read_csv('parameters/EndTour.csv', sep=';') # we could also use the csv for NextStopLocation as the segment definition is the same
-Tours_np = np.zeros((N,len(EndTourPar.index)), dtype=np.float32)
+Tours_np = np.zeros((N,len(EndTourPar.index)), dtype=np.float32) # from here we drop the zone_IDs (labels) and work with consecutive numbering (no label)
 for purpose in purposes:
     for veh_type in veh_types:
         for branch in branches:
@@ -228,4 +235,4 @@ myfile['Trips'] = Trips7978
 myfile.create_mapping('NO',list(mapping.keys()))
 myfile.close()
 
-  
+# save some key variables for later analysis
