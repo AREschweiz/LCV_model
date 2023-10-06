@@ -1,5 +1,5 @@
 # This module loads the data from the national vehicle register and does linear regressions with the population and the number of jobs per branch
-import statsmodels.formula.api as sm
+#import statsmodels.formula.api as sm
 import pandas as pd
 import numpy as np
 
@@ -10,6 +10,8 @@ veh_register = pd.read_csv('BEST_R-20220601.txt', sep="\t")
 veh_register = veh_register[veh_register["Fahrzeugart_Code"].isin([30,36,38])]
 # remove too heavy vehicles
 veh_register = veh_register[veh_register["Gesamtgewicht"]<=3500]
+# keep only Swiss ones
+veh_register = veh_register[veh_register["Staat_Code"]=='CH']
 
 # load the number of jobs and inhabitant per PLZ and branch
 PLZ_variables = pd.read_csv('pop_and_job_pro_PLZ_and_NOGA.csv', sep=";", index_col=0)
@@ -17,13 +19,15 @@ PLZ_variables = pd.read_csv('pop_and_job_pro_PLZ_and_NOGA.csv', sep=";", index_c
 # add a column to veh_register indicating whether the vehicle is light (curbweight <=2 tons)
 veh_register["is_light"]=veh_register["Leergewicht"]<=2000
 # add a column to veh_register indicating whether the vehicle is privately-owned
-veh_register["is_private"]=veh_register["Halterart_Code"]<3 # 1: male, 2: female, 3: business
+veh_register["is_private"]=veh_register["Halterart_Code"]<3 # 1: male, 2: female, 3: business, 4: unknown (-> assumed to be business)
+
+veh_stats = pd.pivot_table(veh_register,values="Leergewicht",index="is_light",columns=["is_private"],aggfunc=len,fill_value=0)
 
 # aggregate vehicle per PLZ and according to the segmentation criteria (Curbweight and owner type)
 veh_agg_PLZ = pd.pivot_table(veh_register,values="Leergewicht",index="PLZ",columns=["is_light","is_private"],aggfunc=len,fill_value=0)
 
-# discard the PLZ which do not belong to Switzerland (Liechtenstein mostly)
-veh_agg_PLZ=veh_agg_PLZ[veh_agg_PLZ.index.isin(PLZ_variables.index)]
+# discard the PLZ which do not belong to Switzerland (Liechtenstein mostly, but also many PLZ do not corresponding to zones - 3003 Bern for instance) - THIS IS NOT GOOD.
+veh_agg_PLZ=veh_agg_PLZ[~(veh_agg_PLZ.index.isin(PLZ_variables.index))]
 
 # merge the two DataFrames
 PLZ_variables=pd.concat([PLZ_variables,veh_agg_PLZ],axis=1)

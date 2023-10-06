@@ -1,1 +1,185 @@
+settings:
+ granularity: 0.1
+ max_tour_duration: 8.0
+ min_n_stops_for_2_opt: 8
+ n_cpu: 20
+ n_external_zones: 13
+ seed:
+ sep: ';'
+ write_omx: True
+ write_csv: True
+ write_shp: False
+ run_parcel_module: False
+ weekday: True
+
+paths:
+ inputs:
+  param_folder: '\parameters\'
+  data_folder: '\data\'
+  centroids: '${data_folder}centroidsNPVM.csv'
+  params_end_tour: '${param_folder}EndTour.csv'
+  params_next_stop: '${param_folder}NextStopLocation.csv'
+  params_n_tours: '${param_folder}nb_tours.csv'
+  params_parcel_couriers: '${param_folder}ParcelCouriers.csv'
+  params_parcel_demand: '${param_folder}ParcelDemand.csv'
+  params_parcel_depots: '${param_folder}ParcelDepots.csv'
+  params_parcel_scheduling: '${param_folder}ParcelScheduling.csv'
+  params_share_active: '${param_folder}prop_active.csv'
+  params_vehicle_generation: '${param_folder}VehicleGeneration.csv'
+  daily_dist_per_branch_empirical_weekday: '${param_folder}dist_by_branch_weekday.csv'
+  daily_dist_per_branch_empirical_full_week: '${param_folder}dist_by_branch_full_week.csv'
+  tt_matrix: '${data_folder}DWV_2017_Strasse_Reisezeit_CH_7978zones.omx'
+  dist_matrix: '${data_folder}DWV_2017_Strasse_Distanz_CH_7978zones.omx'
+  zone_neighbors: '${data_folder}neighborsNPVM.csv'
+  zone_stats: '${data_folder}Strukturdaten2013_pro_Verkehrszone.csv'
+  mapping_PLZ: '${data_folder}mapping_Verkehrszone_PLZ.csv'
+
+ outputs:
+  output_folder: '\outputs\run2013\'
+  parcel_demand_csv: '${output_folder}parcel_demand.csv'
+  parcel_demand_shape: '${output_folder}parcel_demand.shp'
+  parcel_schedules_csv: '${output_folder}parcel_schedules.csv'
+  parcel_schedules_shape: '${output_folder}parcel_schedules.shp'
+  trips_csv: '${output_folder}trips.csv'
+  trips_shape: '${output_folder}trips.shp'
+  trip_matrix_csv: '${output_folder}trip_matrix.csv'
+  trip_matrix_omx: '${output_folder}trip_matrix.omx'
+  daily_dist_per_branch_csv: '${output_folder}daily_dist_per_branch.csv'
+
+expected_fields:
+ centroids:
+  - 'zone_id'
+  - 'x_coord'
+  - 'y_coord'
+ params_correction:
+  - 'Branch'
+ params_correction_parcel:
+  - 'Value'
+ params_end_tour:
+  - 'ASC'
+  - 'cons_2stops'
+  - 'b_lnStops'
+  - 'b_cost_return'
+  - 'prob_return'
+ params_next_stop:
+  - 'b_LowDen'
+  - 'b_Res'
+  - 'b_Inter'
+  - 'b_EmpNode'
+  - 'b_same_ZIP'
+  - 'b_cost_0'
+  - 'b_cost_first'
+  - 'b_cost_50'
+  - 'b_jobs_pop'
+  - 'cost_per_hour'
+  - 'cost_per_km'
+ params_parcel_couriers:
+  - 'Courier'
+  - 'Share'
+ params_parcel_demand:
+  - 'Parameter'
+  - 'Value'
+ params_parcel_depots:
+  - 'DepotID'
+  - 'Courier'
+  - 'ZoneID'
+ params_parcel_scheduling:
+  - 'Parameter'
+  - 'Value'
+ params_vehicle_generation:
+  - 'A'
+  - 'B'
+  - 'C'
+  - 'D'
+  - 'E'
+  - 'F'
+  - 'G'
+  - 'H'
+  - 'I'
+  - 'J'
+  - 'K'
+  - 'L'
+  - 'M'
+  - 'N'
+  - 'O'
+  - 'P'
+  - 'Q'
+  - 'R'
+  - 'S'
+  - 'Pop'
+ zone_neighbors:
+  - 'ZONE_1'
+  - 'ZONE_2'
+ zone_stats:
+  - 'ID'
+  - 'A'
+  - 'B'
+  - 'C'
+  - 'D'
+  - 'E'
+  - 'F'
+  - 'G'
+  - 'H'
+  - 'I'
+  - 'J'
+  - 'K'
+  - 'L'
+  - 'M'
+  - 'N'
+  - 'O'
+  - 'P'
+  - 'Q'
+  - 'R'
+  - 'S'
+  - 'Jobs'
+  - 'Area'
+  - 'Pop'
+  - 'RoadAccessibility'
+
+dimensions:
+ branch:
+  - 'A'
+  - 'B'
+  - 'C'
+  - 'D'
+  - 'E'
+  - 'F'
+  - 'G'
+  - 'H'
+  - 'I'
+  - 'J'
+  - 'K'
+  - 'L'
+  - 'M'
+  - 'N'
+  - 'O'
+  - 'P'
+  - 'Q'
+  - 'R'
+  - 'S'
+  - 'Pop'
+ vehicle_type: # this differentiation not used at the time, but we leave it as it might be useful later.
+  - 'all'
+ segment:
+  - id: 'Private'
+    vehicle_type: [ 'all' ]
+    branch: [ 'Pop' ]
+  - id: 'C'
+    vehicle_type: [ 'all' ]
+    branch: ['C']
+  - id: 'F'
+    vehicle_type: [ 'all' ]
+    branch: [ 'F' ]
+  - id: 'G'
+    vehicle_type: [ 'all' ]
+    branch: [ 'G' ]
+  - id: 'H'
+    vehicle_type: [ 'all' ]
+    branch: [ 'H' ]
+  - id: 'N'
+    vehicle_type: [ 'all' ]
+    branch: [ 'N' ]
+  - id: 'Other'
+    vehicle_type: [ 'all' ]
+    branch: ['A', 'B', 'D', 'E', 'I', 'J', 'K', 'L', 'M', 'O', 'P', 'Q', 'R', 'S']
 
