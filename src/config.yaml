@@ -1,5 +1,5 @@
 settings:
- granularity: 0.1
+ granularity: 1
  max_tour_duration: 8.0
  min_n_stops_for_2_opt: 8
  n_cpu: 20
@@ -7,7 +7,7 @@ settings:
  seed:
  sep: ';'
  write_omx: True
- write_csv: True
+ write_csv: False
  write_shp: False
  run_parcel_module: False
  weekday: True
