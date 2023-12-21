@@ -39,15 +39,15 @@ def main(config: Dict[str, Dict[str, Any]]) -> pd.DataFrame:
     zone_stats = pd.read_csv(path_zone_stats, sep=sep)
     n_zones = zone_stats.shape[0]
     jobs = dict(
-        (row['Zone NPVM'], row['Industrial'] + row['Trade'] + row['Transport'] + row['Services'])
+        (row['ID'], row['Jobs'])
         for row in zone_stats.to_dict('records'))
     population = dict(
-        (row['Zone NPVM'], row['Pop'])
+        (row['ID'], row['Pop'])
         for row in zone_stats.to_dict('records'))
 
     centroids = pd.read_csv(path_centroids, sep=sep)
 
-    dist_matrix, zone_mapping, zone_ids = get_skim_matrix(path_dist_matrix, n_zones, n_external_zones)
+    dist_matrix, zone_mapping, zone_ids = get_omx_matrix(path_dist_matrix, n_zones, n_external_zones)
 
     zone_neighbors = [[] for i in range(n_zones)]
     for row in pd.read_csv(path_zone_neighbors, sep=sep).to_dict('records'):

@@ -1,10 +1,13 @@
 import pandas as pd
+from pathlib import Path
 
-path_outputs = 'P:/Projects_Active/22064 ARE Audit and update of Swiss national LCV model/Work/Analyses/Runs/improvement_5_parcel/'
+folder_project = Path.cwd().parent
 
-path_params_parcel_couriers = 'C:/Users/sth/AAA_Sebastiaan/Significance/GitHub/lcv-model-are/parameters/ParcelCouriers.csv'
-path_params_parcel_depots = 'C:/Users/sth/AAA_Sebastiaan/Significance/GitHub/lcv-model-are/parameters/ParcelDepots.csv'
-path_zone_stats = 'P:/Projects_Active/22064 ARE Audit and update of Swiss national LCV model/Sources/from_ARE/Socioeconomics (CONFIDENTIAL)/FTE_pro_ZoneNPVM.csv'
+path_outputs = folder_project / 'outputs' / 'parcel_delivery'
+
+path_params_parcel_couriers = folder_project / 'parameters' / 'ParcelCouriers.csv'
+path_params_parcel_depots = folder_project / 'parameters' / 'ParcelDepots.csv'
+path_zone_stats = folder_project / 'data' / 'zone_stats_2013_NPVM.csv'
 
 max_parcels_per_van = 160
 parcels_per_person = 0.0752 * 1.23
@@ -25,8 +28,8 @@ population = zone_stats['Pop'].values
 
 zone_mapping = dict((value, i) for i, value in enumerate(zone_stats['Zone NPVM'].values))
 
-parcel_demand = pd.read_csv(path_outputs + 'parcel_demand.csv', sep=';')
-parcel_schedules = pd.read_csv(path_outputs + 'parcel_schedules.csv', sep=';')
+parcel_demand = pd.read_csv(path_outputs / 'parcel_demand.csv', sep=';')
+parcel_schedules = pd.read_csv(path_outputs / 'parcel_schedules.csv', sep=';')
 
 print('Calculating statistics...')
 

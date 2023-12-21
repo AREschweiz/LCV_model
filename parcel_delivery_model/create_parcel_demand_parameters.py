@@ -45,4 +45,4 @@ average_num_attempts = (
     2 * (1.0 - p_attempt_1) * p_attempt_2 +
     3 * (1.0 - p_attempt_1) * (1.0 - p_attempt_2))
 
-print('average_num_attemps:', round(average_num_attempts, 4))
+print('average_num_attempts:', round(average_num_attempts, 4))

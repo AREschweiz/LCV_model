@@ -20,8 +20,7 @@ from src.support import (
     get_dimension, get_setting, get_input_path, get_output_path, get_omx_matrix, get_n_cpu,
     improve_tour_sequence, get_zone_stats)
 
-import parcel_demand_synthesis
-import parcel_delivery_scheduling
+from parcel_delivery_model import (parcel_demand_synthesis, parcel_delivery_scheduling)
 
 
 def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
@@ -89,7 +88,6 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
 
     tt_matrix, zone_mapping, zone_ids = get_omx_matrix(path_tt_matrix, n_zones, n_external_zones)
     dist_matrix, zone_mapping, zone_ids = get_omx_matrix(path_dist_matrix, n_zones, n_external_zones)
-    params_next_stop: List[Dict[str, Any]] = pd.read_csv(path_params_next_stop, sep=sep).to_dict('records')
 
     inv_zone_mapping = dict((value, key) for key, value in zone_mapping.items())
     mapping_PLZ = pd.read_csv(path_mapping_PLZ, index_col=0, sep=sep)

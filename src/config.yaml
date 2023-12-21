@@ -7,9 +7,9 @@ settings:
  seed:
  sep: ';'
  write_omx: True
- write_csv: False
- write_shp: False
- run_parcel_module: False
+ write_csv: True
+ write_shp: True
+ run_parcel_module: True
  weekday: True
 
 paths:
@@ -31,7 +31,7 @@ paths:
   tt_matrix: '${data_folder}DWV_2017_Strasse_Reisezeit_CH_7978zones.omx'
   dist_matrix: '${data_folder}DWV_2017_Strasse_Distanz_CH_7978zones.omx'
   zone_neighbors: '${data_folder}neighborsNPVM.csv'
-  zone_stats: '${data_folder}Strukturdaten2013_pro_Verkehrszone.csv'
+  zone_stats: '${data_folder}zone_stats_2013_NPVM.csv'
   mapping_PLZ: '${data_folder}mapping_Verkehrszone_PLZ.csv'
 
  outputs:

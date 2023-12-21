@@ -41,8 +41,8 @@ def main(
     centroids = pd.read_csv(path_centroids, sep=sep)
     n_zones = centroids.shape[0] - n_external_zones
 
-    tt_matrix, zone_mapping, zone_ids = get_skim_matrix(path_tt_matrix, n_zones, n_external_zones)
-    dist_matrix, zone_mapping, zone_ids = get_skim_matrix(path_dist_matrix, n_zones, n_external_zones)
+    tt_matrix, zone_mapping, zone_ids = get_omx_matrix(path_tt_matrix, n_zones, n_external_zones)
+    dist_matrix, zone_mapping, zone_ids = get_omx_matrix(path_dist_matrix, n_zones, n_external_zones)
 
     depots = pd.read_csv(path_params_parcel_depots, sep=sep)[['DepotID', 'Courier', 'ZoneID']]
 

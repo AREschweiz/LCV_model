@@ -1,3 +1,9 @@
+###########
+# This file lists for each zone all of its neighboring zones.
+# This is useful to ensure that the regions served from a parcel centre are connected.
+###########
+
+
 import numpy as np
 import pandas as pd
 import shapefile as shp
