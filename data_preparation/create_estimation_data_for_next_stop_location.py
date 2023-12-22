@@ -10,7 +10,6 @@ from pathlib import Path
 
 folder_project = Path.cwd().parent
 
-
 #%%
 
 use_new_skim = True
@@ -18,8 +17,9 @@ use_new_skim = True
 path_zone_stats = folder_project / 'data' / 'zone_stats_2013_ZIP.csv'
 
 # Official LCV cost figures, corrected by producer price index (2013, 2016)
-chf_per_hour: float = 48.90 * (100.3 / 95.7)
-chf_per_km: float = 0.5553 * (100.3 / 95.7)
+prices_df = pd.read_csv(folder_project/ 'parameters' / 'prices_2013.csv', sep=';', index_col=0).squeeze()
+chf_per_hour: float = prices_df.loc['chf_per_hour_ref'] * (prices_df.loc['price_index_target'] / prices_df.loc['price_index_ref'])
+chf_per_km: float = prices_df.loc['chf_per_km_ref'] * (prices_df.loc['price_index_target'] / prices_df.loc['price_index_ref'])
 
 n_zones_npa: int = 3187
 

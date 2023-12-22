@@ -7,9 +7,8 @@ settings:
  seed:
  sep: ';'
  write_omx: True
- write_csv: True
- write_shp: True
- run_parcel_module: False
+ write_csv: False
+ write_shp: False
  weekday: True
 
 paths:
@@ -20,10 +19,6 @@ paths:
   params_end_tour: '${param_folder}EndTour.csv'
   params_next_stop: '${param_folder}NextStopLocation.csv'
   params_n_tours: '${param_folder}nb_tours.csv'
-  params_parcel_couriers: '${param_folder}ParcelCouriers.csv'
-  params_parcel_demand: '${param_folder}ParcelDemand.csv'
-  params_parcel_depots: '${param_folder}ParcelDepots.csv'
-  params_parcel_scheduling: '${param_folder}ParcelScheduling.csv'
   params_share_active: '${param_folder}prop_active.csv'
   params_vehicle_generation: '${param_folder}VehicleGeneration.csv'
   daily_dist_per_branch_empirical_weekday: '${param_folder}dist_by_branch_weekday.csv'
@@ -31,20 +26,16 @@ paths:
   tt_matrix: '${data_folder}DWV_2017_Strasse_Reisezeit_CH_7978zones.omx'
   dist_matrix: '${data_folder}DWV_2017_Strasse_Distanz_CH_7978zones.omx'
   same_zip_matrix: '${data_folder}same_zip_matrix.omx'
-  zone_neighbors: '${data_folder}neighborsNPVM.csv'
-  zone_stats: '${data_folder}zone_stats_2013_NPVM.csv'
+  zone_stats: '${data_folder}zone_stats_2021_NPVM.csv'
+  prices: '${param_folder}prices_2021.csv'
 
  outputs:
-  output_folder: '\outputs\run2013\'
+  output_folder: '\outputs\run2021\'
   log_folder: '${output_folder}log\'
-  parcel_demand_csv: '${output_folder}parcel_demand.csv'
-  parcel_demand_shape: '${output_folder}parcel_demand.shp'
-  parcel_schedules_csv: '${output_folder}parcel_schedules.csv'
-  parcel_schedules_shape: '${output_folder}parcel_schedules.shp'
-  trips_csv: '${output_folder}trips.csv'
-  trips_shape: '${output_folder}trips.shp'
-  trip_matrix_csv: '${output_folder}trip_matrix.csv'
-  trip_matrix_omx: '${output_folder}trip_matrix.omx'
+  trips_csv: '${output_folder}trips_LCV.csv'
+  trips_shape: '${output_folder}trips_LCV.shp'
+  trip_matrix_csv: '${output_folder}trip_matrix_LCV.csv'
+  trip_matrix_omx: '${output_folder}trip_matrix_LCV.omx'
   daily_dist_per_branch_csv: '${output_folder}daily_dist_per_branch.csv'
 
 expected_fields:
@@ -54,8 +45,6 @@ expected_fields:
   - 'y_coord'
  params_correction:
   - 'Branch'
- params_correction_parcel:
-  - 'Value'
  params_end_tour:
   - 'ASC'
   - 'cons_2stops'
@@ -72,21 +61,6 @@ expected_fields:
   - 'b_cost_first'
   - 'b_cost_50'
   - 'b_jobs_pop'
-  - 'cost_per_hour'
-  - 'cost_per_km'
- params_parcel_couriers:
-  - 'Courier'
-  - 'Share'
- params_parcel_demand:
-  - 'Parameter'
-  - 'Value'
- params_parcel_depots:
-  - 'DepotID'
-  - 'Courier'
-  - 'ZoneID'
- params_parcel_scheduling:
-  - 'Parameter'
-  - 'Value'
  params_vehicle_generation:
   - 'A'
   - 'B'
@@ -108,9 +82,6 @@ expected_fields:
   - 'R'
   - 'S'
   - 'Pop'
- zone_neighbors:
-  - 'ZONE_1'
-  - 'ZONE_2'
  zone_stats:
   - 'ID'
   - 'A'

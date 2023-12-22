@@ -1,13 +1,10 @@
 import numpy as np
 import seaborn as sns
-import sys
 import pandas as pd
 from pathlib import Path
 folder_project = Path.cwd().parent
-sys.path.append(str(folder_project / 'src'))
-
-from support import (
-    read_yaml, get_dimension, get_setting, get_input_path, get_omx_matrix)
+from src.support import (
+    read_yaml, get_setting, get_input_path, get_omx_matrix, get_output_path)
 import matplotlib.pyplot as plt
 
 # graphic parameters
@@ -17,7 +14,7 @@ plt.rcParams.update({
 label_size = 14
 
 # read config file
-config = read_yaml(folder_project / 'src' / 'config.yaml')
+config = read_yaml(str(folder_project / 'src' / 'config.yaml'))
 sep = get_setting(config, 'sep', str)
 n_external_zones = get_setting(config, 'n_external_zones', int)
 n_zones = 7965

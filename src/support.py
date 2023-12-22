@@ -78,7 +78,7 @@ def read_yaml(path: str) -> Dict[str, Dict[str, Any]]:
     if not isinstance(config, dict):
         config = {}
 
-    for main_section in ['settings', 'paths', 'expected_fields', 'dimensions']:
+    for main_section in ['settings', 'paths', 'expected_fields']:
         if config.get(main_section) is None:
             raise Exception(f"Could not find main section '{main_section}' in 'config.yaml'.")
 

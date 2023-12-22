@@ -18,9 +18,7 @@ from src.support import (
     read_yaml, get_logger, log_and_check_config,
     write_shape_line,
     get_dimension, get_setting, get_input_path, get_output_path, get_omx_matrix, get_n_cpu,
-    improve_tour_sequence, get_zone_stats)
-
-from parcel_delivery_model import (parcel_demand_synthesis, parcel_delivery_scheduling)
+    get_zone_stats, improve_tour_sequence)
 
 
 def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
@@ -38,7 +36,6 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
     write_omx = get_setting(config, 'write_omx', bool)
     write_csv = get_setting(config, 'write_csv', bool)
     write_shp = get_setting(config, 'write_shp', bool)
-    run_parcel_module = get_setting(config, 'run_parcel_module', bool)
     weekday = get_setting(config, 'weekday', bool)
 
     path_centroids = get_input_path(config, 'centroids')
@@ -51,6 +48,7 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
     path_params_next_stop = get_input_path(config, 'params_next_stop')
     path_params_n_tours = get_input_path(config, 'params_n_tours')
     path_params_share_active = get_input_path(config, 'params_share_active')
+    path_params_prices = get_input_path(config, 'prices')
     path_params_vehicle_generation = get_input_path(config, 'params_vehicle_generation')
     path_daily_dist_per_branch_empirical_weekday = get_input_path(config, 'daily_dist_per_branch_empirical_weekday')
     path_daily_dist_per_branch_empirical_full_week = get_input_path(config, 'daily_dist_per_branch_empirical_full_week')
@@ -68,18 +66,6 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
     segment_inds = dict(zip(segment_ids, range(0, len(segment_ids))))
 
     n_segment = len(dim_segment)
-    n_branches = len(dim_branch)
-
-    if run_parcel_module:
-        logger.info('Parcel Demand Synthesis module...')
-
-        parcel_demand = parcel_demand_synthesis.main(config)
-
-        logger.info('Parcel Delivery Scheduling module...')
-
-        parcel_schedules = parcel_delivery_scheduling.main(config, parcel_demand)
-
-    logger.info('Generic LCV module...')
 
     logger.info('\tReading input data...')
 
@@ -136,24 +122,29 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
 
     logger.info(f'\t\tRandom seed used for tour construction: {seed}')
 
-    params_end_tour: List[Dict[str, Any]] = pd.read_csv(path_params_end_tour, sep=sep,
-                                                        index_col=0)  # .to_dict('records')
-    params_next_stop: List[Dict[str, Any]] = pd.read_csv(path_params_next_stop, sep=sep,
-                                                         index_col=0)  # .to_dict('records')
+    params_end_tour = pd.read_csv(path_params_end_tour, sep=sep,
+                                                        index_col=0)
+    params_next_stop = pd.read_csv(path_params_next_stop, sep=sep,
+                                                         index_col=0)
+    params_prices = pd.read_csv(path_params_prices, sep=sep, index_col=0).squeeze()
+    chf_per_hour: float = params_prices.loc['chf_per_hour_ref'] * (
+                params_prices.loc['price_index_target'] / params_prices.loc['price_index_ref'])
+    chf_per_km: float = params_prices.loc['chf_per_km_ref'] * (
+                params_prices.loc['price_index_target'] / params_prices.loc['price_index_ref'])
 
-    for segment in segment_ids:
-        logger.debug(f"\t\tSettings segment {segment}:")
-        logger.debug(f"\t\t\tprob_return: {params_end_tour.loc[segment, 'prob_return']}")
-        logger.debug(f"\t\t\tcost_per_hour: {params_next_stop.loc[segment, 'cost_per_hour']}")
-        logger.debug(f"\t\t\tcost_per_km: {params_next_stop.loc[segment, 'cost_per_km']}")
+    logger.debug("\t\tSettings:")
+    logger.debug(f"\t\t\tprob_return: {params_end_tour.loc[segment, 'prob_return']}")
+    logger.debug(f"\t\t\tcost_per_hour: {chf_per_hour}")
+    logger.debug(f"\t\t\tcost_per_km: {chf_per_km}")
 
     n_cpu = get_n_cpu(get_setting(config, 'n_cpu', int), 16, logger)
 
     if n_cpu == 1:
 
-        trip_matrix, tours = calc_tour_construction(
+        trips = calc_tour_construction(
             n_tours, segment_ids,
             tt_matrix, dist_matrix, same_zip_matrix,
+            chf_per_hour, chf_per_km,
             land_use, population, jobs,
             params_end_tour, params_next_stop,
             granularity, max_tour_duration_minutes, min_n_stops_for_2_opt,
@@ -171,6 +162,7 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
                 calc_tour_construction,
                 n_tours, segment_ids,
                 tt_matrix, dist_matrix, same_zip_matrix,
+                chf_per_hour, chf_per_km,
                 land_use, population, jobs,
                 params_end_tour, params_next_stop,
                 granularity, max_tour_duration_minutes, min_n_stops_for_2_opt,
@@ -248,11 +240,6 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
     trip_matrix = 0.5 * trip_matrix + 0.5 * np.transpose(trip_matrix)
 
     #####
-    if run_parcel_module:
-        # Add the parcel trips to the trip_matrix
-        for row in parcel_schedules.to_dict('records'):
-            trip_matrix[zone_mapping[row['orig_zone']], zone_mapping[row['dest_zone']]] += 1.0
-
     # Augment the size of the trip matrix to include zones in Liechtenstein as well as Büsingen and Campione d'Italia
     # (OD pairs filled with zeros)
     trip_matrix_incl_external = np.zeros((n_zones + n_external_zones, n_zones + n_external_zones), dtype=np.float32)
@@ -344,6 +331,8 @@ def calc_tour_construction(
         tt_matrix: np.ndarray,
         dist_matrix: np.ndarray,
         same_zip_matrix: np.ndarray,
+        chf_per_hour: float,
+        chf_per_km: float,
         land_use: np.ndarray,
         population: np.ndarray,
         jobs: np.ndarray,
@@ -405,13 +394,10 @@ def calc_tour_construction(
         # The probability of making a return trip at the end of the tour
         prob_return: float = params_end_tour.loc[segment, 'prob_return']
 
-        # The cost figures
-        cost_per_hour: float = params_next_stop.loc[segment, 'cost_per_hour']
-        cost_per_km: float = params_next_stop.loc[segment, 'cost_per_km']
-
+        # Cost_matrix
         cost_matrix: np.ndarray = (
-                                          cost_per_hour * tt_matrix / 60 +
-                                          cost_per_km * dist_matrix) / 100  # the division by 100 means that the cost is expressed in 100 CHF.
+                                          chf_per_hour * tt_matrix / 60 +
+                                          chf_per_km * dist_matrix) / 100  # the division by 100 means that the cost is expressed in 100 CHF.
         # This is for numerical reasons more convenient.
 
         for o in subset_origin_zones:  # iterates over origins

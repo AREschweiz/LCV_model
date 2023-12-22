@@ -1,6 +1,7 @@
 import logging
 import numpy as np
 import pandas as pd
+import openmatrix as omx
 
 from typing import Any, Dict, List, Tuple
 
@@ -25,6 +26,7 @@ def main(
     sep = get_setting(config, 'sep', str)
     write_csv = get_setting(config, 'write_csv', bool)
     write_shp = get_setting(config, 'write_shp', bool)
+    write_omx = get_setting(config, 'write_omx', bool)
 
     path_centroids = get_input_path(config, 'centroids')
     path_dist_matrix = get_input_path(config, 'dist_matrix')
@@ -35,6 +37,7 @@ def main(
 
     path_out_parcel_schedules_csv = get_output_path(config, 'parcel_schedules_csv')
     path_out_parcel_schedules_shape = get_output_path(config, 'parcel_schedules_shape')
+    path_out_parcel_trips_omx = get_output_path(config, 'parcel_trips_omx')
 
     logger.info("\tImporting data...")
 
@@ -71,6 +74,17 @@ def main(
     if write_csv:
         logger.info('\tWriting parcel schedules to .csv...')
         parcel_schedules.to_csv(path_out_parcel_schedules_csv, sep=sep, index=False)
+
+    if write_omx:
+        trip_matrix = np.zeros(shape=[n_zones+n_external_zones, n_zones+n_external_zones], dtype=int)
+        for row in parcel_schedules.to_dict('records'):
+            trip_matrix[zone_mapping[row['orig_zone']], zone_mapping[row['dest_zone']]] += 1
+
+        logger.info('Writing trip matrix to .omx...')
+        myfile = omx.open_file(path_out_parcel_trips_omx, 'w')
+        myfile['Trips'] = trip_matrix
+        myfile.create_mapping('NO', list(zone_mapping.keys()))
+        myfile.close()
 
     return parcel_schedules
 

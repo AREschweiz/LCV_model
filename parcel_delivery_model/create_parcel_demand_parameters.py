@@ -10,16 +10,14 @@ growth_factor = 1.0
 perc_b2b = 0.23
 perc_b2c = 0.71 + 0.06
 
-# Total number of parcel deliveries
+# Total number of parcel deliveries in 2021
 # (Swiss Post: 201.1 mln., minus 2-3 mln. export)
 # (Private: 50.0 mln.)
 n_parcels_total = (201.1 - 2.5 + 50.0) * 1000000
 
-# Total employment and population
-# Source (CH, 2013): FTE_pro_ZoneNPVM.csv
-# TODO: Use 2021 zone statistics instead of 2013
-sum_jobs = 3880099
-sum_persons = 8139631
+# Total employment and population 2021
+sum_jobs = 4593770 # source: labour productivity by economic activity at previous year's prices
+sum_persons = 8700000 # average of population on 1.1.2021 and 31.12.2021
 
 # Calculations
 n_parcels_b2b = n_parcels_total * perc_b2b

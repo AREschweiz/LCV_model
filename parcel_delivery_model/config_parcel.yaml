@@ -1,0 +1,79 @@
+settings:
+ max_tour_duration: 8.0
+ n_external_zones: 13 # Liechtenstein
+ seed:
+ sep: ';'
+ write_omx: True
+ write_csv: True
+ write_shp: True
+ weekday: True
+
+paths:
+ inputs:
+  param_folder: '\parameters\'
+  data_folder: '\data\'
+  centroids: '${data_folder}centroidsNPVM.csv'
+  params_parcel_couriers: '${param_folder}ParcelCouriers.csv'
+  params_parcel_demand: '${param_folder}ParcelDemand.csv'
+  params_parcel_depots: '${param_folder}ParcelDepots.csv'
+  params_parcel_scheduling: '${param_folder}ParcelScheduling.csv'
+  tt_matrix: '${data_folder}DWV_2017_Strasse_Reisezeit_CH_7978zones.omx'
+  dist_matrix: '${data_folder}DWV_2017_Strasse_Distanz_CH_7978zones.omx'
+  zone_neighbors: '${data_folder}neighborsNPVM.csv'
+  zone_stats: '${data_folder}zone_stats_2021_NPVM.csv'
+
+ outputs:
+  output_folder: '\outputs\parcels2021\'
+  log_folder: '${output_folder}log\'
+  parcel_demand_csv: '${output_folder}parcel_demand.csv'
+  parcel_demand_shape: '${output_folder}parcel_demand.shp'
+  parcel_schedules_csv: '${output_folder}parcel_schedules.csv'
+  parcel_schedules_shape: '${output_folder}parcel_schedules.shp'
+  parcel_trips_omx: '${output_folder}parcel_trips.omx'
+
+expected_fields:
+ centroids:
+  - 'zone_id'
+  - 'x_coord'
+  - 'y_coord'
+ params_parcel_couriers:
+  - 'Courier'
+  - 'Share'
+ params_parcel_demand:
+  - 'Parameter'
+  - 'Value'
+ params_parcel_depots:
+  - 'DepotID'
+  - 'Courier'
+  - 'ZoneID'
+ params_parcel_scheduling:
+  - 'Parameter'
+  - 'Value'
+ zone_neighbors:
+  - 'ZONE_1'
+  - 'ZONE_2'
+ zone_stats:
+  - 'ID'
+  - 'A'
+  - 'B'
+  - 'C'
+  - 'D'
+  - 'E'
+  - 'F'
+  - 'G'
+  - 'H'
+  - 'I'
+  - 'J'
+  - 'K'
+  - 'L'
+  - 'M'
+  - 'N'
+  - 'O'
+  - 'P'
+  - 'Q'
+  - 'R'
+  - 'S'
+  - 'Jobs'
+  - 'Area'
+  - 'Pop'
+  - 'RoadAccessibility'

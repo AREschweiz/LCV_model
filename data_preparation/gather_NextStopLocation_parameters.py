@@ -31,8 +31,6 @@ for segment, file_name in segment_files.items():
     parameters[segment] = segment_par['Estimate']
 parameters = parameters.fillna(0)
 parameters = parameters.transpose()
-parameters['cost_per_hour'] = 50.94
-parameters['cost_per_km'] = 0.5785
 
 parameters.to_csv(folder_project / 'parameters'/ 'NextStopLocation.csv', sep=';')
 

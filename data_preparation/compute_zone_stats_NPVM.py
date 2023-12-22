@@ -6,21 +6,15 @@
 import pandas as pd
 import geopandas
 import numpy as np
-import openmatrix as omx
 from typing import Any, Dict, List, Tuple
-import sys
 from pathlib import Path
+from src.support import get_omx_matrix
+
+year_data = 2021
 folder_project = Path.cwd().parent
-sys.path.append(str(folder_project / 'src')) # necessary to be able to import get_skim_matrix
-import support
-
-year_data = 2013
-
 
 path_STATPOP = f'D:/GIS/STATPOP/STATPOP{year_data}_ZonenNPVM.shp' # shapefile containing the population by zone
 path_STATENT = f'D:/GIS/STATENT/STATENT_{year_data}.gpkg' # gpkg containing the STATENT (point-data)
-
-#from folder_project / src / 'support.py' import get_skim_matrix
 
 # Load Statent
 gdf = geopandas.read_file(path_STATENT).to_crs(2056)
@@ -58,8 +52,8 @@ stats_NPVM = stats_NPVM.fillna(0)
 stats_NPVM = stats_NPVM.loc['101001':'681001005']
 
 # Add road accessibility
-beta = 0.05
-tt_matrix, zone_mapping, zone_ids = support.get_skim_matrix(str(folder_project / 'data' / 'DWV_2017_Strasse_Reisezeit_CH_7978zones.omx'), n_zones=7965, n_external_zones= 13)
+beta: float = 0.05
+tt_matrix, zone_mapping, zone_ids = get_omx_matrix(str(folder_project / 'data' / 'DWV_2017_Strasse_Reisezeit_CH_7978zones.omx'), n_zones=7965, n_external_zones= 13)
 stats_NPVM['RoadAccessibility'] = np.matmul(np.exp(-beta*tt_matrix), stats_NPVM['Population'].values) + 0.5 * np.matmul(np.exp(-beta*tt_matrix), stats_NPVM['Jobs'].values)
 stats_NPVM = stats_NPVM.rename(columns={'Population':'Pop'})
 
