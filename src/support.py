@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Tuple, Type
 
 
 def get_logger(
-    config: Dict[str, Dict[str, Any]]
+        config: Dict[str, Dict[str, Any]]
 ) -> Tuple[logging.Logger, logging.StreamHandler, logging.handlers.TimedRotatingFileHandler]:
     """
     Create a logger object which prints messages to the terminal and writes a log file.
@@ -32,28 +32,28 @@ def get_logger(
     def float_to_time_stamp(value: float):
         time_stamp = datetime.fromtimestamp(value)
         return (
-            str(time_stamp.year).rjust(4, '0') +
-            str(time_stamp.month).rjust(2, '0') +
-            str(time_stamp.day).rjust(2, '0') +
-            '_' +
-            str(time_stamp.hour).rjust(2, '0') +
-            str(time_stamp.minute).rjust(2, '0') +
-            str(time_stamp.second).rjust(2, '0'))
+                str(time_stamp.year).rjust(4, '0') +
+                str(time_stamp.month).rjust(2, '0') +
+                str(time_stamp.day).rjust(2, '0') +
+                '_' +
+                str(time_stamp.hour).rjust(2, '0') +
+                str(time_stamp.minute).rjust(2, '0') +
+                str(time_stamp.second).rjust(2, '0'))
 
-    if config['paths']['outputs'].get('output_folder') is None:
-        raise Exception("No path was specified for 'output_folder' under 'paths/outputs' in the YAML file.")
+    if config['paths']['outputs'].get('log_folder') is None:
+        raise Exception("No path was specified for 'log_folder' under 'paths/outputs' in the YAML file.")
     else:
-        path_output = os.path.dirname(os.getcwd()) + config['paths']['outputs'].get('output_folder')
+        path_output = os.path.dirname(os.getcwd()) + config['paths']['outputs'].get('log_folder')
 
     if not os.path.exists(path_output):
         logger.removeHandler(log_stream_handler)
         raise Exception(
             "Tried to open a log file in the following folder that could not be located: " +
-            f"'{os.getcwd()}{config['paths']['outputs']['output_folder']}'.")
+            f"'{os.getcwd()}{config['paths']['outputs']['log_folder']}'.")
 
     out_file_name = (
-        path_output +
-        'log_' + float_to_time_stamp(time.time()) + '.txt')
+            path_output +
+            'log_' + float_to_time_stamp(time.time()) + '.txt')
 
     log_file_handler = logging.handlers.TimedRotatingFileHandler(
         out_file_name, when='D', interval=3, backupCount=10)
@@ -103,8 +103,8 @@ def read_yaml(path: str) -> Dict[str, Dict[str, Any]]:
 
 
 def log_and_check_config(
-    config: Dict[str, Dict[str, Any]],
-    logger: logging.Logger
+        config: Dict[str, Dict[str, Any]],
+        logger: logging.Logger
 ):
     """
     Writes the contents of the config file to the logger, checks if the input files exist, and checks if the
@@ -145,9 +145,9 @@ def log_and_check_config(
 
 
 def get_dimension(
-    config: Dict[str, Dict[str, Any]],
-    name: str,
-    is_allowed_to_be_none: bool = False
+        config: Dict[str, Dict[str, Any]],
+        name: str,
+        is_allowed_to_be_none: bool = False
 ) -> List[Dict[str, Any]]:
     """
     Gets the contents of a dimension specified in the YAML file.
@@ -161,10 +161,10 @@ def get_dimension(
 
 
 def get_setting(
-    config: Dict[str, Dict[str, Any]],
-    name: str,
-    required_type: Type = None,
-    is_allowed_to_be_none: bool = False
+        config: Dict[str, Dict[str, Any]],
+        name: str,
+        required_type: Type = None,
+        is_allowed_to_be_none: bool = False
 ) -> Any:
     """
     Gets the value of a setting specified in the YAML file.
@@ -188,9 +188,9 @@ def get_setting(
 
 
 def get_input_path(
-    config: Dict[str, Dict[str, Any]],
-    name: str,
-    is_allowed_to_be_none: bool = False
+        config: Dict[str, Dict[str, Any]],
+        name: str,
+        is_allowed_to_be_none: bool = False
 ) -> str:
     """
     Gets the path of a specified input file in the YAML file.
@@ -205,9 +205,9 @@ def get_input_path(
 
 
 def get_output_path(
-    config: Dict[str, Dict[str, Any]],
-    name: str,
-    is_allowed_to_be_none: bool = False
+        config: Dict[str, Dict[str, Any]],
+        name: str,
+        is_allowed_to_be_none: bool = False
 ) -> str:
     """
     Gets the path of a specified output file in the YAML file.
@@ -222,11 +222,11 @@ def get_output_path(
 
 
 def write_shape_line(
-    path: str,
-    data: pd.DataFrame,
-    columns_coords: List[str],
-    decimal_coords: int = 2,
-    decimal_cols: int = 2
+        path: str,
+        data: pd.DataFrame,
+        columns_coords: List[str],
+        decimal_coords: int = 2,
+        decimal_cols: int = 2
 ) -> None:
     """
     Writes a DataFrame with coordinates to shapefile.
@@ -276,10 +276,10 @@ def write_shape_line(
 
 
 def get_omx_matrix(
-    path_omx_matrix: str,
-    n_zones: int,
-    n_external_zones: int,
-    sub_table_name: str = ''
+        path_omx_matrix: str,
+        n_zones: int,
+        n_external_zones: int,
+        sub_table_name: str = ''
 ) -> Tuple[np.ndarray, Dict[int, int], np.ndarray]:
     '''
     Get a matrix saved in OMX format.
@@ -289,7 +289,7 @@ def get_omx_matrix(
         - zone_mapping (Dict[int, int])
         - zone_ids (np.ndarray)
     '''
-    # Import travel time matrix
+    # Import matrix
     with omx.open_file(path_omx_matrix, 'r') as omx_file:
         sub_table_name = omx_file.list_matrices()[0] if sub_table_name == '' else sub_table_name
         matrix = np.array(omx_file[sub_table_name]).astype(np.float32)
@@ -310,8 +310,8 @@ def get_omx_matrix(
 
 @njit
 def improve_tour_sequence(
-    sequence_init: np.ndarray,
-    dist_matrix: np.ndarray
+        sequence_init: np.ndarray,
+        dist_matrix: np.ndarray
 ):
     """
     Improve a sequence of visiting zones by swapping its order and accepting swaps if they reduce the total distance.
@@ -349,9 +349,9 @@ def improve_tour_sequence(
 
 
 def get_n_cpu(
-    n_cpu: int,
-    max_n_cpu: int,
-    logger: logging.Logger
+        n_cpu: int,
+        max_n_cpu: int,
+        logger: logging.Logger
 ) -> int:
     """
     Determine the number of cores over which to spread processes.
@@ -371,6 +371,7 @@ def get_n_cpu(
         n_cpu = max(1, min(mp.cpu_count() - 1, max_n_cpu))
 
     return n_cpu
+
 
 def get_zone_stats(
         path_zone_stats: str,
@@ -413,39 +414,78 @@ def get_zone_stats(
 
     return (zone_stats, population, jobs, land_use)
 
-def Furness(matrix,cons_sum_rows,cons_sum_cols, EpsilonCriterion, max_steps:int):
-  # matrix: matrix to be balanced
-  # cons_sum_rows : vector of constraints for the sum of rows
-  # cons_sum_cols : vector of constraints for the sum of columns
-  # EpsilonCriterion: required precision (stopping criterion)
-  # max_steps: maximum number of steps (stopping criterion)
-  cons_sum_rows=np.atleast_1d(np.squeeze(cons_sum_rows))# to ensure that the constraints are always 1-dimensional arrays
-  cons_sum_cols=np.atleast_1d(np.squeeze(cons_sum_cols))
-  matrix=np.atleast_2d(matrix)
 
-  if np.sum(cons_sum_rows) * np.sum(cons_sum_cols) > 0:
-    if np.sum(matrix)==0:
-      print("the initial matrix contains only zeros, but not the constraints")
-    else:
-        StepNb = 0
-        SumRows = np.sum(matrix,0)
-        SumCols = np.sum(matrix,1)
-        Nr = np.shape(matrix)[0]
-        Nc = np.shape(matrix)[1]
-        epsilon = EpsilonCriterion+1 # simply to ensure that we enter the loop.
-        a = np.ones(Nr, dtype=np.float32)
-        b = np.ones(Nc, dtype=np.float32)
-        if max(np.logical_and(SumRows==0,cons_sum_rows>0)):
-            print('Problem not solvable because of row constraints')
-        if max(np.logical_and(SumCols==0,cons_sum_cols>0)):
-            print('Problem not solvable because of column constraints')
-        while StepNb <= max_steps and epsilon > EpsilonCriterion:
-            epsilon = 0
-            StepNb += 1
-            a_old = a
-            b_old = b
-            a = np.divide(cons_sum_cols, np.matmul(matrix, b), out=np.ones_like(cons_sum_cols),where=cons_sum_cols!=0)
-            b = np.divide(cons_sum_rows, np.matmul(a, matrix), out=np.ones_like(cons_sum_rows),where=cons_sum_rows!=0)
-            epsilon = np.max([np.max(abs(np.divide(a, a_old) - 1)), np.max(abs(np.divide(b, b_old) - 1))])
-        print("epsilon:{0}".format(epsilon))
-  return a.reshape((Nr,1)) * matrix * b
+def furness(
+        matrix: np.ndarray,
+        cons_sum_rows: np.ndarray,
+        cons_sum_cols: np.ndarray,
+        epsilon_criterion: float,
+        max_steps: int) -> np.ndarray:
+    """
+  matrix: matrix to be balanced
+  cons_sum_rows : vector of constraints for the sum of rows
+  cons_sum_cols : vector of constraints for the sum of columns
+  EpsilonCriterion: required precision (stopping criterion)
+  max_steps: maximum number of steps (stopping criterion)
+  """
+    cons_sum_rows = np.atleast_1d(
+        np.squeeze(cons_sum_rows))  # to ensure that the constraints are always 1-dimensional arrays
+    cons_sum_cols = np.atleast_1d(np.squeeze(cons_sum_cols))
+    matrix = np.atleast_2d(matrix)
+
+    if np.sum(cons_sum_rows) * np.sum(cons_sum_cols) > 0:
+        if np.sum(matrix) == 0:
+            print("the initial matrix contains only zeros, but not the constraints")
+        else:
+            step_nb: int = 0
+            sum_rows = np.sum(matrix, 0)
+            sum_cols = np.sum(matrix, 1)
+            num_rows = np.shape(matrix)[0]
+            num_cols = np.shape(matrix)[1]
+            epsilon = epsilon_criterion + 1  # simply to ensure that we enter the loop.
+            a = np.ones(num_rows, dtype=np.float32)
+            b = np.ones(num_cols, dtype=np.float32)
+            if max(np.logical_and(sum_rows == 0, cons_sum_rows > 0)):
+                print('Problem not solvable because of row constraints')
+            if max(np.logical_and(sum_cols == 0, cons_sum_cols > 0)):
+                print('Problem not solvable because of column constraints')
+            while step_nb <= max_steps and epsilon > epsilon_criterion:
+                epsilon = 0
+                step_nb += 1
+                a_old = a
+                b_old = b
+                a = np.divide(cons_sum_cols, np.matmul(matrix, b), out=np.ones_like(cons_sum_cols),
+                              where=cons_sum_cols != 0)
+                b = np.divide(cons_sum_rows, np.matmul(a, matrix), out=np.ones_like(cons_sum_rows),
+                              where=cons_sum_rows != 0)
+                epsilon = np.max([np.max(abs(np.divide(a, a_old) - 1)), np.max(abs(np.divide(b, b_old) - 1))])
+            print("epsilon:{0}".format(epsilon))
+    return a.reshape((num_rows, 1)) * matrix * b
+
+
+def get_and_write_same_zip_matrix(mapping_npvm_zip: dict, n_zones: int, npvm_mapping: dict, output_path: str) -> np.ndarray:
+    # returns a binary matrix for the zones npvm, with 1 iff the zones in row and column have the same zip code
+    # mapping_npvm_zip: is a dict with zone npvm as key and zip as value
+    # npvm_mapping: is a dict with zone npvm as key and index in the npvm matrices as value
+    zip_set = set(list(mapping_npvm_zip.values()))
+
+    # construct a dict where key = zip and value = list of npvm zones corresponding to this PLZ
+    zip_to_npvm = {zip_code: [] for zip_code in zip_set}
+    for zone_npvm, zip_code in mapping_npvm_zip.items():
+        zip_to_npvm[zip_code].append(zone_npvm)
+
+    # Fill in same_zip_matrix
+    same_zip_matrix = np.zeros(shape=[n_zones, n_zones], dtype=bool)
+    for zip_code in zip_set:
+        for zone_1 in zip_to_npvm[zip_code]:
+            for zone_2 in zip_to_npvm[zip_code]:
+                same_zip_matrix[npvm_mapping[zone_1], npvm_mapping[zone_2]] = True
+
+    npvm_zones_internal = [key for key in npvm_mapping.keys() if int(key) < 700101001]
+    # Save it as omx
+    myfile = omx.open_file(output_path, 'w')
+    myfile['same_zip'] = same_zip_matrix
+    myfile.create_mapping('NO', npvm_zones_internal)
+    myfile.close()
+
+    return same_zip_matrix

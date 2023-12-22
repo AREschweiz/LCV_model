@@ -44,8 +44,8 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
     path_centroids = get_input_path(config, 'centroids')
     path_dist_matrix = get_input_path(config, 'dist_matrix')
     path_tt_matrix = get_input_path(config, 'tt_matrix')
+    path_same_zip_matrix = get_input_path(config, 'same_zip_matrix')
     path_zone_stats = get_input_path(config, 'zone_stats')
-    path_mapping_PLZ = get_input_path(config, 'mapping_PLZ')
 
     path_params_end_tour = get_input_path(config, 'params_end_tour')
     path_params_next_stop = get_input_path(config, 'params_next_stop')
@@ -88,23 +88,7 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
 
     tt_matrix, zone_mapping, zone_ids = get_omx_matrix(path_tt_matrix, n_zones, n_external_zones)
     dist_matrix, zone_mapping, zone_ids = get_omx_matrix(path_dist_matrix, n_zones, n_external_zones)
-
-    inv_zone_mapping = dict((value, key) for key, value in zone_mapping.items())
-    mapping_PLZ = pd.read_csv(path_mapping_PLZ, index_col=0, sep=sep)
-    PLZ_list = mapping_PLZ['PLZ'].unique()
-
-    # construct a dict with all zones having each PLZ
-    PLZ_to_NPVM = {PLZ: [] for PLZ in PLZ_list}
-    for zone_NPVM, row in mapping_PLZ.iterrows():
-        PLZ_to_NPVM[row['PLZ']].append(zone_NPVM)
-
-    # Fill in same_PLZ_matrix
-    same_PLZ_matrix = np.zeros(shape=[n_zones + n_external_zones, n_zones + n_external_zones], dtype=bool)
-    for PLZ in PLZ_list:
-        for zone_1 in PLZ_to_NPVM[PLZ]:
-            for zone_2 in PLZ_to_NPVM[PLZ]:
-                same_PLZ_matrix[zone_mapping[zone_1], zone_mapping[zone_2]] = True
-    same_PLZ_matrix = same_PLZ_matrix[0:n_zones, 0:n_zones]
+    same_zip_matrix = get_omx_matrix(path_same_zip_matrix, n_zones, 0)[0]
 
     centroids = dict(
         (row['zone_id'], (row['x_coord'], row['y_coord']))
@@ -169,7 +153,7 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
 
         trip_matrix, tours = calc_tour_construction(
             n_tours, segment_ids,
-            tt_matrix, dist_matrix, same_PLZ_matrix,
+            tt_matrix, dist_matrix, same_zip_matrix,
             land_use, population, jobs,
             params_end_tour, params_next_stop,
             granularity, max_tour_duration_minutes, min_n_stops_for_2_opt,
@@ -186,7 +170,7 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
             functools.partial(
                 calc_tour_construction,
                 n_tours, segment_ids,
-                tt_matrix, dist_matrix, same_PLZ_matrix,
+                tt_matrix, dist_matrix, same_zip_matrix,
                 land_use, population, jobs,
                 params_end_tour, params_next_stop,
                 granularity, max_tour_duration_minutes, min_n_stops_for_2_opt,
@@ -246,6 +230,7 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
     trip_matrix = np.sum(trip_matrix, axis=0)
 
     if write_shp or write_csv:
+        inv_zone_mapping = dict((value, key) for key, value in zone_mapping.items())
         trips_df['orig_zone'] = [inv_zone_mapping[int(orig_zone)] for orig_zone in trips_df['orig_zone'].values]
         trips_df['dest_zone'] = [inv_zone_mapping[int(dest_zone)] for dest_zone in trips_df['dest_zone'].values]
 
@@ -358,7 +343,7 @@ def calc_tour_construction(
         segment_ids: List[str],
         tt_matrix: np.ndarray,
         dist_matrix: np.ndarray,
-        same_PLZ_matrix: np.ndarray,
+        same_zip_matrix: np.ndarray,
         land_use: np.ndarray,
         population: np.ndarray,
         jobs: np.ndarray,
@@ -468,18 +453,18 @@ def calc_tour_construction(
                     ######## Next Stop Location
                     # First compute the utility of each zone
                     if leg_rank == 0:
-                        u_next_stop: np.ndarray = u_next_stop_dest_component + (1-same_PLZ_matrix[
+                        u_next_stop: np.ndarray = u_next_stop_dest_component + (1-same_zip_matrix[
                                                                                                 curr_zone, :])*(
                                 (params_next_stop.loc[segment, 'b_cost_0'] + params_next_stop.loc[segment,
                                 'b_cost_first']) *
                                 cost_matrix[curr_zone, :]) + \
-                                                  params_next_stop.loc[segment, 'b_same_ZIP'] * same_PLZ_matrix[
+                                                  params_next_stop.loc[segment, 'b_same_ZIP'] * same_zip_matrix[
                                                                                                 curr_zone, :]
                     else:
-                        u_next_stop = u_next_stop_dest_component + (1-same_PLZ_matrix[curr_zone, :])*(
+                        u_next_stop = u_next_stop_dest_component + (1-same_zip_matrix[curr_zone, :])*(
                                 params_next_stop.loc[segment, 'b_cost_0'] * cost_matrix[curr_zone, :])
 
-                    u_next_stop += (1-same_PLZ_matrix[curr_zone, :])*(
+                    u_next_stop += (1-same_zip_matrix[curr_zone, :])*(
                             params_next_stop.loc[segment, 'b_cost_50'] * np.maximum(
                         cost_matrix[curr_zone, :] - 50 / 100, np.zeros(n_zones, dtype=np.float32)))
 
@@ -508,7 +493,7 @@ def calc_tour_construction(
                     leg_rank += 1
 
                     ######## End Tour
-                    if same_PLZ_matrix[curr_zone, o]:
+                    if same_zip_matrix[curr_zone, o]:
                         end_tour = True
                     else:
                         # Add the missing terms to the utility to continue
@@ -529,7 +514,7 @@ def calc_tour_construction(
                     if end_tour:
                         # Samples the decision to make a return trip (=stochastic part)
                         # make_return_trip: bool = (np.random.rand() <= prob_return)
-                        if same_PLZ_matrix[curr_zone, o]:
+                        if same_zip_matrix[curr_zone, o]:
                             make_return_trip = False
                         else:
                             if leg_rank == 1:

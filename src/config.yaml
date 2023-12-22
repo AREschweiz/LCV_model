@@ -3,13 +3,13 @@ settings:
  max_tour_duration: 8.0
  min_n_stops_for_2_opt: 8
  n_cpu: 20
- n_external_zones: 13
+ n_external_zones: 13 # Liechtenstein
  seed:
  sep: ';'
  write_omx: True
  write_csv: True
  write_shp: True
- run_parcel_module: True
+ run_parcel_module: False
  weekday: True
 
 paths:
@@ -30,12 +30,13 @@ paths:
   daily_dist_per_branch_empirical_full_week: '${param_folder}dist_by_branch_full_week.csv'
   tt_matrix: '${data_folder}DWV_2017_Strasse_Reisezeit_CH_7978zones.omx'
   dist_matrix: '${data_folder}DWV_2017_Strasse_Distanz_CH_7978zones.omx'
+  same_zip_matrix: '${data_folder}same_zip_matrix.omx'
   zone_neighbors: '${data_folder}neighborsNPVM.csv'
   zone_stats: '${data_folder}zone_stats_2013_NPVM.csv'
-  mapping_PLZ: '${data_folder}mapping_Verkehrszone_PLZ.csv'
 
  outputs:
   output_folder: '\outputs\run2013\'
+  log_folder: '${output_folder}log\'
   parcel_demand_csv: '${output_folder}parcel_demand.csv'
   parcel_demand_shape: '${output_folder}parcel_demand.shp'
   parcel_schedules_csv: '${output_folder}parcel_schedules.csv'
