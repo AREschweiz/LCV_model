@@ -45,20 +45,6 @@ zone_mapping_inv: Dict[int, int] = dict((v, k) for k, v in zone_mapping.items())
 # Trips
 trips_df = pd.read_csv(folder_project / 'data' / 'trips_lcv_data.csv', sep=',')
 
-# Explanatory variables
-zone_stats = pd.read_csv(path_zone_stats, sep=';')
-population: np.ndarray = zone_stats['Pop'].values
-jobs: np.ndarray = zone_stats['Jobs'].values
-land_use: np.ndarray = zone_stats['LandUse'].values
-
-population[pd.isna(population)] = 0.0
-
-#%%
-
-print('Compute accessibility per zone')
-accessibility = np.matmul(np.exp(-0.05 * tt_matrix), population + jobs)
-print(f'Average accessibility : {np.mean(accessibility)}')
-
 #%%
 
 print('Constructing choice data...')
@@ -94,16 +80,14 @@ for i, row in enumerate(trips_df.to_dict('records')):
     tmp_new_record: List[Any] = [
         oid, statistical_weight, is_return,
         purpose_goods, purpose_service, curb_weight, branch,
-        trip_id, accessibility[zone_orig],
-        cost_matrix[zone_orig, zone_base]]
+        trip_id, cost_matrix[zone_orig, zone_base]]
 
     estimation_data.append(tmp_new_record.copy())
 
 df_columns: List[str] = [
     'OID', 'STATISTICAL_WEIGHT',
     'IS_RETURN', 'PURPOSE_GOODS', 'PURPOSE_SERVICE', 'CURB_WEIGHT', 'BRANCH',
-    'TRIP_ID', 'ACCESSIBILITY',
-    'COST_RETURN']
+    'TRIP_ID', 'COST_RETURN']
 
 estimation_data_df = pd.DataFrame(np.array(estimation_data), columns=df_columns)
 

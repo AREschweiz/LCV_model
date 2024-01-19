@@ -1,5 +1,5 @@
 settings:
- granularity: 1
+ granularity: 0.1
  max_tour_duration: 8.0
  min_n_stops_for_2_opt: 8
  n_cpu: 20

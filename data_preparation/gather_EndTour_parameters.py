@@ -6,15 +6,15 @@ from pathlib import Path
 folder_project = Path.cwd().parent
 sns.set()
 
-repository = folder_project/'outputs'/'EndTour'
+repository = folder_project/'outputs'/'end_tour'
 segment_files = { # These should be in the same order as the segments in the config file (yaml).
-    'Private': 'EndTour_Private_considering_open_tours_without_lnStops',
-    'C': 'EndTour_C_considering_open_tours_without_2stops_and_cost',
-    'F': 'EndTour_F_considering_open_tours_without_lnstops_and_cost',
-    'G': 'EndTour_G_considering_open_tours_without_lnstops',
-    'H': 'EndTour_H_considering_open_tours_without_lnstops',
-    'N': 'EndTour_N_considering_open_tours_tmp',
-    'Other': 'EndTour_Other_considering_open_tours_wo_lnStops_return'
+    'Private': 'EndTour_Private',
+    'C': 'EndTour_C',
+    'F': 'EndTour_F',
+    'G': 'EndTour_G',
+    'H': 'EndTour_H (49-52)',
+    'N': 'EndTour_N',
+    'Other': 'EndTour_Other'
 }
 
 ## generate csv to be read in simulation
