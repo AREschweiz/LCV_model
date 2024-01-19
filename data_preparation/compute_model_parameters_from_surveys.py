@@ -1,3 +1,7 @@
+###################
+# This script generates csv files with parameters for the module "Active Vehicles", "Number of Tours" and "Correction".
+###################
+
 import pandas as pd
 import numpy as np
 from pathlib import Path

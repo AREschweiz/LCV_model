@@ -1,3 +1,6 @@
+#####
+# This file contains various support functions.
+#####
 import logging
 import logging.handlers
 import multiprocessing as mp

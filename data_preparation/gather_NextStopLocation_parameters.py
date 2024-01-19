@@ -1,3 +1,8 @@
+#############
+# This script gathers the parameters of the module NextStopLocation from the output files of Apollo in a single file with the appropriate format.
+# It also makes a figure illustrating the impact of generalized cost on utility (for the technical report).
+#############
+
 import pandas as pd
 import numpy as np
 import seaborn as sns

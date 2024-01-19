@@ -1,3 +1,6 @@
+#############
+# This script gathers the parameters of the module EndTour from the output files of Apollo in a single file with the appropriate format.
+#############
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -29,6 +32,3 @@ parameters = parameters.transpose()
 parameters['prob_return'] = 0.79879
 
 parameters.to_csv(folder_project / 'parameters' / 'EndTour.csv', sep=';')
-
-a=1
-## generate latex script to display table

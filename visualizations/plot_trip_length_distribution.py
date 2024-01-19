@@ -1,3 +1,8 @@
+###################
+# This script generates an histogram comparing the trip length distribution in the LCV survey with the one from the simulation.
+# To be fair, the comparison should be done for the same year (2013)
+###################
+
 import numpy as np
 import seaborn as sns
 import pandas as pd

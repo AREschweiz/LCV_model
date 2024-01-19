@@ -1,3 +1,11 @@
+# This script estimates a discrete choice model for the module NextStopLocation of the Swiss LCV model.
+# The script needs to be adjusted for every branch by changing:
+# - apollo_control$modelName
+# - apollo_fixed (parameters whose values are kept to the default value (0))
+# - mnl_settings$rows (only observations of the desired branch should be considered)
+
+# author: Raphael Ancel (ARE)
+
 # ################################################################# #
 #### LOAD LIBRARY AND DEFINE CORE SETTINGS                       ####
 # ################################################################# #
@@ -17,7 +25,7 @@ apollo_control = list(
   modelName       = "next_stop_location_other",
   modelDescr      = " ",
   indivID         = "OID", 
-  outputDirectory = "D:/PycharmProjects/LCV_model_uebergabe/outputs/NextStopLocation/with_dist0_for_internal/",
+  outputDirectory = "../outputs/next_stop_location/",
   weights         = "STATISTICAL_WEIGHT",
   nCores          = 30
 )
@@ -27,7 +35,7 @@ apollo_control = list(
 # ################################################################# #
 
 database = read.csv(
-  "D:/PycharmProjects/LCV_model_uebergabe/inputs/estimation_data_for_next_stop_location_half_dist_without_base_filter.csv",
+  "../data/estimation_data_for_next_stop_location.csv",
   header=TRUE,
   sep=';')
 
@@ -101,11 +109,13 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
     avail         = 1,
     choiceVar     = CHOICE,
     utilities     = V,
-  #rows          = (BRANCH == 14))
-  rows          = ((BRANCH !=3) & (BRANCH !=6) & (BRANCH !=7) & (BRANCH != 8) & (BRANCH != 14)  &(BRANCH !=100)))
-  
-  #rows          = (BRANCH =='C'))
-  #rows          = ((BRANCH !='C') & (BRANCH !='F') & (BRANCH !='G') & (BRANCH != 'H') & (BRANCH !='Unknown')))
+    #rows          = (BRANCH ==3)) # branch C
+    #rows          = (BRANCH ==6)) # branch F
+    #rows          = (BRANCH ==7)) # branch G
+    #rows          = (BRANCH ==8)) # branch H
+    #rows          = (BRANCH ==14)) # branch N
+    #rows          = (BRANCH ==100)) # Private
+    rows          = ((BRANCH !=3) & (BRANCH !=6) & (BRANCH !=7) & (BRANCH != 8)  & (BRANCH != 14)  & (BRANCH !=100))) # other
   
   ### Compute probabilities using MNL model
   P[["model"]] = apollo_mnl(mnl_settings, functionality)
@@ -177,7 +187,7 @@ quicktexregapollo <- function(model =model, wtpest=NULL) {
 model_texreg <- quicktexregapollo(model)
 
 # save output
-save(model_texreg, file = paste0("D:/PycharmProjects/LCV_model_uebergabe/lcv-model-are-main/estimation results/NextStopLocation/", apollo_control$modelName, "_texmod.Rdata"))
+save(model_texreg, file = paste0(apollo_control$outputDirectory, apollo_control$modelName, "_texmod.Rdata"))
 
 
 

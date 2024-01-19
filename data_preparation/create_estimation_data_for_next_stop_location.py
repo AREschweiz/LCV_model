@@ -1,5 +1,5 @@
 ###################
-# This script generates a csv file for the estimation of the discrete choice models of the module End Tour.
+# This script generates a csv file for the estimation of the discrete choice models of the module Next Stop Location.
 ###################
 
 import numpy as np

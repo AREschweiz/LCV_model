@@ -1,3 +1,8 @@
+###################
+# This script generates an histogram comparing the distribution of the number of trips in a tour in the LCV survey with the one from the simulation.
+# To be fair, the comparison should be done for the same year (2013)
+###################
+
 import pandas as pd
 from pathlib import Path
 import seaborn as sns

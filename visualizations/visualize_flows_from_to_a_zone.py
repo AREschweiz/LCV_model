@@ -1,3 +1,6 @@
+##
+# Warning : this file needs to be updated (missing input: zonesNPVM_4326.geojson)
+##
 ## Import necessary libraries
 import numpy as np
 import pandas as pd
@@ -11,9 +14,12 @@ import geojson
 import geopandas
 import matplotlib.pyplot as plt
 import itertools
+from pathlib import Path
+
+folder_project = Path.cwd().parent
 
 ## Load the OD matrix
-OMXfile = omx.open_file('Trips_g0.1.omx', 'r')
+OMXfile = omx.open_file(folder_project / 'outputs' / 'run2021' / 'trip_matrix_LCV.omx', 'r')
 Trips = np.array(OMXfile['Trips']).astype(np.float32) # trip OD matrix
 mapping = OMXfile.mapping('NO')
 Zone_IDs = np.array(list(mapping.keys())) # Zone IDs used in the OD matrix
