@@ -53,7 +53,8 @@ axs[1].set(xlabel='Travel time [min]', ylabel='Density', title='Trip duration')
 
 # Load empirical data
 trips_survey = pd.read_csv(folder_project / 'data' / 'trips_lcv_data.csv', sep=',')
-trips_survey = trips_survey[(trips_survey['DIST'] >= 0) * (trips_survey['TTC'] >= 0) ]
+trips_survey = trips_survey[(trips_survey['DIST'] >= 0) * (trips_survey['TTC'] >= 0)]
+trips_survey = trips_survey[(trips_survey['BRANCH'] < 100)]
 trips_survey = trips_survey[~((trips_survey['ORIG'] == trips_survey['DEST']) & (4 * trips_survey['DIST'] <= trips_survey['DIST_SURVEY'] ))] # data cleaning
 trips_survey_external = trips_survey[~(trips_survey['ORIG'] == trips_survey['DEST'])]
 
