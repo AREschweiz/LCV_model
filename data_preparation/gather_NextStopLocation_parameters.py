@@ -17,7 +17,6 @@ folder_project = Path.cwd().parent
 repository = folder_project/'outputs'/'NextStopLocation'
 
 segment_files = {
-    'Private': 'next_stop_location_private',
     'C': 'next_stop_location_C',
     'F': 'next_stop_location_F',
     'G': 'next_stop_location_G',
@@ -25,7 +24,7 @@ segment_files = {
     'N': 'next_stop_location_N',
     'Other': 'next_stop_location_other'
 }
-## generate csv to be read in simulation
+'''## generate csv to be read in simulation
 parameters = pd.DataFrame(columns=segment_files.keys(), index=['b_LowDen', 'b_Res', 'b_Inter', 'b_EmpNode', 'b_same_ZIP',
                                                             'b_cost_first',
                                                                'b_cost_0', 'b_cost_50', 'b_jobs_pop',
@@ -37,9 +36,10 @@ for segment, file_name in segment_files.items():
 parameters = parameters.fillna(0)
 parameters = parameters.transpose()
 
-parameters.to_csv(folder_project / 'parameters'/ 'NextStopLocation.csv', sep=';')
+parameters.to_csv(folder_project / 'parameters'/ 'NextStopLocation.csv', sep=';')'''
 
 ## Make plot
+parameters = pd.read_csv(folder_project / 'parameters'/ 'NextStopLocation.csv', sep=';', index_col=0)
 data_to_plot = pd.DataFrame(data= np.arange(start=0, stop=100, step=1, dtype=np.float64), columns=['cost']) # tmp: we will add more columns in case b_cost_first >0
 
 for segment in parameters.index:

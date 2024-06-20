@@ -26,11 +26,11 @@ paths:
   tt_matrix: '${data_folder}DWV_2017_Strasse_Reisezeit_CH_7978zones.omx'
   dist_matrix: '${data_folder}DWV_2017_Strasse_Distanz_CH_7978zones.omx'
   same_zip_matrix: '${data_folder}same_zip_matrix.omx'
-  zone_stats: '${data_folder}zone_stats_2021_NPVM.csv'
-  prices: '${param_folder}prices_2021.csv'
+  zone_stats: '${data_folder}zone_stats_2013_NPVM.csv'
+  prices: '${param_folder}prices_2013.csv'
 
  outputs:
-  output_folder: '\outputs\run2021\'
+  output_folder: '\outputs\run2013\'
   log_folder: '${output_folder}log\'
   trips_csv: '${output_folder}trips_LCV.csv'
   trips_shape: '${output_folder}trips_LCV.shp'
@@ -81,7 +81,6 @@ expected_fields:
   - 'Q'
   - 'R'
   - 'S'
-  - 'Pop'
  zone_stats:
   - 'ID'
   - 'A'
@@ -129,13 +128,9 @@ dimensions:
   - 'Q'
   - 'R'
   - 'S'
-  - 'Pop'
  vehicle_type: # this differentiation not used at the time, but we leave it as it might be useful later.
   - 'all'
  segment:
-  - id: 'Private'
-    vehicle_type: [ 'all' ]
-    branch: [ 'Pop' ]
   - id: 'C'
     vehicle_type: [ 'all' ]
     branch: ['C']

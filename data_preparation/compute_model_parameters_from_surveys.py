@@ -10,7 +10,7 @@ from typing import Any, Dict, List
 folder_project = Path.cwd().parent
 
 #######################################################################
-## Prepare some mmappings
+## Prepare some mappings
 #######################################################################
 
 # generate dict mapping NOGA codes from LWE to NOGA letter
