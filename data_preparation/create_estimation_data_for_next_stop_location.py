@@ -64,9 +64,20 @@ zone_mapping_inv: Dict[int, int] = dict((v, k) for k, v in zone_mapping.items())
 
 trips_df = pd.read_csv(folder_project / 'data' / 'trips_lcv_data.csv', sep=',')
 
+# Remove trips with either unknown origin or unknown destination
+prop_trips_unknown_dist = len(trips_df[trips_df['DIST']==-1].index) / len(trips_df.index)
+trips_df = trips_df[trips_df['DIST']>=0]
+print(f'The proportion of trips removed due to non-localized origin or destination is {100*prop_trips_unknown_dist}')
+
 # remove internal trips where the reported distance is more than 2 times larger than the distance to the closest PLZ neighbor
 # the factor 2 is here because we assumed the internal distance to be half of the distance to the nearest neighbor
+nb_trips_before_cleaning = len(trips_df.index)
 trips_df = trips_df[~((trips_df['ORIG'] == trips_df['DEST']) & (2 * 2*trips_df['DIST'] <= trips_df['DIST_SURVEY']))]
+print(f' {nb_trips_before_cleaning-len(trips_df.index)} legs were removed due to too'
+      f' long internal distance ({100 * (nb_trips_before_cleaning-len(trips_df.index))/nb_trips_before_cleaning}\%)')
+
+# Compute the proportion of trips being filtered due to unknown postal code
+prop_trips_unknown_dist = len(trips_df[trips_df['DIST']==-1].index) / len(trips_df.index)
 
 cum_bin_sizes_init: List[int] = [0] + [int(value) for value in np.cumsum(bin_sizes_init)]
 cum_bin_sizes_interm: List[int] = [0] + [int(value) for value in np.cumsum(bin_sizes_interm)]
@@ -109,7 +120,7 @@ for i, row in enumerate(trips_df.to_dict('records')):
     if trip_id == 0:
         zone_base: int = zone_orig
 
-    if zone_orig is None or zone_dest is None:
+    if zone_orig is None or zone_dest is None: # ignore cases where the origin or destination is abroad / a large organization
         continue
 
     if (trip_id>0 and (zone_dest == zone_base)):

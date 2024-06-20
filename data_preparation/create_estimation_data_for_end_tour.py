@@ -48,7 +48,8 @@ trips_df = pd.read_csv(folder_project / 'data' / 'trips_lcv_data.csv', sep=',')
 #%%
 
 print('Constructing choice data...')
-
+nb_unlocalized_return_trips: int = 0
+nb_subsequent_trips: int = 0
 estimation_data: List[List[Any]] = []
 
 np.random.seed(seed)
@@ -65,7 +66,9 @@ for i, row in enumerate(trips_df.to_dict('records')):
         zone_base: int = zone_orig
         continue
 
+    nb_subsequent_trips += 1
     if zone_orig is None or zone_base is None:
+        nb_unlocalized_return_trips += 1
         continue
 
     purpose_goods: int = row['PURPOSE_GOODS'] if not pd.isna(row['PURPOSE_GOODS']) else 0
@@ -91,6 +94,7 @@ df_columns: List[str] = [
 
 estimation_data_df = pd.DataFrame(np.array(estimation_data), columns=df_columns)
 
+print(f'Proportion of unlocalized return trips {nb_unlocalized_return_trips / nb_subsequent_trips *100}')
 #%%
 
 print('Exporting choice data...')

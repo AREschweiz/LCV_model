@@ -102,8 +102,20 @@ shipments_df = sheet[[
     'quelle_km', 'ziel_km', 'Anzahl_Stopps', 'wh_tot_cal']]
 shipments_df = shipments_df.sort_values(['OID', 'quelle_km'])
 
-# Remove users who made simplified tours (those with many stops)
+dist_per_user = shipments_df.groupby(['OID','wh_tot_cal'], as_index=False).agg(min_km=('quelle_km', 'min'), max_km=('ziel_km', 'max'))
+dist_per_user['daily_dist']=dist_per_user['max_km']-dist_per_user['min_km']
+
 oid_with_simplified_tours = np.unique(shipments_df.loc[~pd.isna(shipments_df['Anzahl_Stopps']), 'OID'])
+# compute some stats about users doing simplified tours
+Prop_users_with_simplified_tours = len(oid_with_simplified_tours) / len(np.unique(shipments_df['OID'].to_numpy()))
+dist_per_user_simplified_tours = dist_per_user[dist_per_user['OID'].isin(oid_with_simplified_tours)]
+avg_dist_per_user_simplified_tours = (dist_per_user_simplified_tours['wh_tot_cal'] * dist_per_user_simplified_tours['daily_dist']).sum() /\
+                                     dist_per_user_simplified_tours['wh_tot_cal'].sum()
+dist_per_user_other = dist_per_user[~dist_per_user['OID'].isin(oid_with_simplified_tours)]
+avg_dist_per_user_other = (dist_per_user_other['wh_tot_cal'] * dist_per_user_other['daily_dist']).sum() /\
+                                     dist_per_user_other['wh_tot_cal'].sum()
+print(f'users who did simplified tours traveled {100*(avg_dist_per_user_simplified_tours/avg_dist_per_user_other-1)} \% more than others.')
+# Remove users who made simplified tours (those with many stops)
 shipments_df = shipments_df[~shipments_df['OID'].isin(oid_with_simplified_tours)]
 shipments_df = shipments_df.drop(columns='Anzahl_Stopps')
 
@@ -111,6 +123,7 @@ n_shipments = len(shipments_df)
 shipments_df.index = [i for i in range(n_shipments)]
 
 print(n_shipments, 'shipments')
+
 
 # Gives the purpose given the OID
 oid_purpose_goods: Dict[int, int] = dict((row['OID'], row['MAIN_USE_GOODS_TRANSPORT']) for row in shipments_df.to_dict('records'))
@@ -212,10 +225,6 @@ for i, row in enumerate(legs.to_dict('records')):
     legs.at[i, 'BRANCH'] = oid_branch[row['OID']]
     legs.at[i, 'STATISTICAL_WEIGHT'] = oid_statistical_weight[row['OID']]
 
-#%% Data cleaning: remove internal trips where the recorded distance is 4 times larger than in the skim matrix.
-legs = legs[~((legs['ORIG'] == legs['DEST']) & (4 * legs['DIST'] <= legs['DIST_SURVEY']))]
-legs = legs.reset_index(drop=True)
-print(len(legs), 'legs')
 
 #%% Define tours
 # Find the rows of the legs in each tour
