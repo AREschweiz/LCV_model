@@ -7,6 +7,7 @@ import pandas as pd
 from pathlib import Path
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
 plt.rcParams.update({
     "text.usetex": True
 })
@@ -16,8 +17,11 @@ folder_project = Path.cwd().parent
 # Load LCV data  (tours)
 tours_survey = pd.read_csv(folder_project / 'data' / 'tours_lcv_data.csv', sep=',')
 tours_survey = tours_survey.rename(columns={'N_TRIPS': 'number of trips', 'STATISTICAL_WEIGHT': 'weight'})
-tours_survey = tours_survey[~((tours_survey['INTERNAL']>1) & (tours_survey['RECORDED_DIST_FIRST_LEG'] > 4 * tours_survey['DIST_RETURN']))]
+tours_survey = tours_survey[tours_survey['BRANCH']<100]
+tours_survey = tours_survey[~((tours_survey['INTERNAL']>0) & (tours_survey['RECORDED_DIST_FIRST_LEG'] > 4 * tours_survey['DIST_RETURN']))]
 tours_survey['weight'] = tours_survey['weight']/sum(tours_survey['weight'])
+
+# Descriptive stats on the number of trips per tour
 
 # Load list of individual trips resulting from model
 trips_model = pd.read_csv(folder_project / 'outputs' / 'run2013' / 'trips.csv', sep=';')
@@ -25,9 +29,11 @@ tours_model = trips_model.groupby(by='tour_id')['weight'].agg(['mean', 'count'])
 tours_model['weight'] = tours_model['weight']/sum(tours_model['weight'])
 
 fig, ax = plt.subplots(1, 1)
-sns.histplot(ax=ax,data=tours_model, x='number of trips', weights='weight', label='Model', discrete=True)
-sns.histplot(ax=ax,data=tours_survey, x='number of trips', weights='weight', label='Survey', discrete=True)
-ax.set(xlabel='Number of trips in tour', ylabel='Density')
+sns.histplot(ax=ax,data=tours_model, x='number of trips', weights='weight', label='Model', discrete=True, stat='percent')
+sns.histplot(ax=ax,data=tours_survey, x='number of trips', weights='weight', label='Survey', discrete=True, stat='percent')
+ax.set(xlabel='Number of trips in tour', ylabel='Proportion of tours [\%]')
+plt.xlim(0, 20)
+ax.xaxis.set_major_locator(MultipleLocator(1))
 
 plt.legend()
 plt.savefig( folder_project / 'outputs' / 'figures' / 'nb_trips_in_tour.svg', bbox_inches='tight', format='svg')
