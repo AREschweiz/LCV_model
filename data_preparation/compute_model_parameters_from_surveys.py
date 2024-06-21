@@ -79,6 +79,20 @@ tours = pd.read_csv(folder_project / 'data' / 'tours_lcv_data.csv')
 tours = tours.replace({'BRANCH': NOGA_BFS}) # from number to letter
 tours = tours.replace({'BRANCH': NOGA_to_group}) # from letter to group
 
+
+# compute average recorded tour distance for kept tours and discarded tours
+ind_discarded = tours.index[((tours['INTERNAL']>0) &
+                            (tours['RECORDED_DIST_FIRST_LEG'] > 4 * tours['DIST_RETURN']))]
+ind_kept = tours.index[~((tours['INTERNAL']>0) &
+                            (tours['RECORDED_DIST_FIRST_LEG'] > 4 * tours['DIST_RETURN']))]
+avg_recorded_dist_discarded_tours = (tours.loc[ind_discarded, 'RECORDED_TOTAL_DIST'] *
+                                     tours.loc[ind_discarded, 'STATISTICAL_WEIGHT']).sum()/\
+                                    tours.loc[ind_discarded, 'STATISTICAL_WEIGHT'].sum()
+avg_recorded_dist_kept_tours = (tours.loc[ind_kept, 'RECORDED_TOTAL_DIST'] *
+                                     tours.loc[ind_kept, 'STATISTICAL_WEIGHT']).sum()/\
+                                    tours.loc[ind_kept, 'STATISTICAL_WEIGHT'].sum()
+
+#
 nb_tours =tours.groupby(['OID', 'BRANCH', 'STATISTICAL_WEIGHT'], as_index=False).agg(nb_tours=('TOUR_ID',"count"))
 
 weighted_avg = lambda x: np.average(x, weights=nb_tours.loc[x.index, "STATISTICAL_WEIGHT"])
@@ -117,3 +131,4 @@ surveys_type_1_tmp = surveys_type_1[surveys_type_1['DayOfWeek'].isin(['MO', 'DI'
 weighted_avg = lambda x: np.average(x, weights=surveys_type_1_tmp.loc[x.index, "wh_tot_cal"])
 dist_by_branch = surveys_type_1_tmp.groupby(["level1"]).agg(daily_dist=("KM_TOTAL", weighted_avg))
 dist_by_branch.to_csv(folder_project / 'parameters' / 'dist_by_branch_weekday.csv')
+
