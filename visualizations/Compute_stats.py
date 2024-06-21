@@ -28,7 +28,7 @@ trips_localized = trips_localized[~((trips_localized['ORIG'] == trips_localized[
                                     (2 * 2*trips_localized['DIST'] <= trips_localized['DIST_SURVEY']))]
 
 fig, ax = plt.subplots(1)
-sns.scatterplot(ax=ax, data=trips, x='DIST_SURVEY', y='DIST', )
+sns.scatterplot(ax=ax, data=trips, x='DIST_SURVEY', y='DIST')
 ax.set(xlabel='Reported distance [km]', ylabel='Distance according to NPVM2017 [km]')
 ax.set_xlim([1, 1000])
 ax.set_ylim([1, 1000])
