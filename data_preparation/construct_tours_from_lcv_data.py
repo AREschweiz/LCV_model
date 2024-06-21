@@ -249,6 +249,7 @@ for tour_id, leg_indices in where_tour_id.items():
     tour_is_internal = int(legs.at[leg_indices[0], 'ORIG'] == legs.at[leg_indices[0], 'DEST'])
     return_trip_made = int(legs.at[leg_indices[0], 'ORIG'] == legs.at[leg_indices[-1], 'DEST']) if not tour_is_internal else -1
     recorded_dist_first_leg = legs.at[leg_indices[0], 'DIST_SURVEY']
+    recorded_total_dist = legs.loc[leg_indices, 'DIST_SURVEY'].sum()
 
     if return_trip_made:
         orig_return = legs.at[leg_indices[-1], 'ORIG']
@@ -274,7 +275,9 @@ for tour_id, leg_indices in where_tour_id.items():
         ttc_return, dist_return,
         oid_purpose_goods[oid], oid_purpose_service[oid],
         oid_curb_weight[oid], oid_branch[oid],
-        oid_statistical_weight[oid]])
+        oid_statistical_weight[oid],
+        recorded_total_dist])
+
 
 tours_df = pd.DataFrame(
     np.array(tours),
@@ -284,11 +287,8 @@ tours_df = pd.DataFrame(
         'RECORDED_DIST_FIRST_LEG',
         'TTC_RETURN', 'DIST_RETURN',
         'PURPOSE_GOODS', 'PURPOSE_SERVICE',
-        'CURB_WEIGHT', 'BRANCH', 'STATISTICAL_WEIGHT'])
-
-
-#%% Data cleaning
-
+        'CURB_WEIGHT', 'BRANCH', 'STATISTICAL_WEIGHT',
+        'RECORDED_TOTAL_DIST'])
 
 #%%
 
