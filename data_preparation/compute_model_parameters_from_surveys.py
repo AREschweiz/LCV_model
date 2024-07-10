@@ -69,7 +69,7 @@ prop_active_MoFr.name = 'p_active'
 
 prop_active = pd.merge(left=prop_active_MoSu, right=prop_active_MoFr, suffixes=(" (Mo-Su)"," (Mo-Fr)"), how='outer', left_index=True, right_index=True)
 prop_active = prop_active.fillna(0)
-prop_active.to_csv(folder_project / 'parameters' /' prop_active.csv')
+prop_active.to_csv(folder_project / 'parameters' /'prop_active.csv')
 
 ########################################################################
 ##################### Number of tours
