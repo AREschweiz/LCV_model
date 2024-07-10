@@ -39,6 +39,8 @@ def main(
     path_out_parcel_schedules_shape = get_output_path(config, 'parcel_schedules_shape')
     path_out_parcel_trips_omx = get_output_path(config, 'parcel_trips_omx')
 
+    path_zones_npvm_incl_abroad = get_input_path(config, 'all_zones_npvm')
+
     logger.info("\tImporting data...")
 
     centroids = pd.read_csv(path_centroids, sep=sep)
@@ -50,6 +52,9 @@ def main(
     depots = pd.read_csv(path_params_parcel_depots, sep=sep)[['DepotID', 'Courier', 'ZoneID']]
 
     parcels_per_van, max_parcel_tour_duration = get_params_parcel_scheduling(path_params_parcel_scheduling, sep)
+
+    zones_npvm_incl_abroad = pd.read_csv(path_zones_npvm_incl_abroad, sep=sep)
+    n_zones_incl_abroad = len(zones_npvm_incl_abroad.index)
 
     logger.info("\tForming delivery clusters...")
 
@@ -76,14 +81,17 @@ def main(
         parcel_schedules.to_csv(path_out_parcel_schedules_csv, sep=sep, index=False)
 
     if write_omx:
-        trip_matrix = np.zeros(shape=[n_zones+n_external_zones, n_zones+n_external_zones], dtype=int)
+        # Augment the size of the trip matrix to include all zones of npvm, including abroad.
+        # (OD pairs filled with zeros)
+        trip_matrix = np.zeros(shape=[n_zones_incl_abroad, n_zones_incl_abroad], dtype=int)
+
         for row in parcel_schedules.to_dict('records'):
             trip_matrix[zone_mapping[row['orig_zone']], zone_mapping[row['dest_zone']]] += 1
 
         logger.info('Writing trip matrix to .omx...')
         myfile = omx.open_file(path_out_parcel_trips_omx, 'w')
         myfile['Trips'] = trip_matrix
-        myfile.create_mapping('NO', list(zone_mapping.keys()))
+        myfile.create_mapping('NO', zones_npvm_incl_abroad['Nr'].to_list())
         myfile.close()
 
     return parcel_schedules

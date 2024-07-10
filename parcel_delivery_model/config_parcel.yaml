@@ -21,6 +21,7 @@ paths:
   dist_matrix: '${data_folder}DWV_2017_Strasse_Distanz_CH_7978zones.omx'
   zone_neighbors: '${data_folder}neighborsNPVM.csv'
   zone_stats: '${data_folder}zone_stats_2021_NPVM.csv'
+  all_zones_npvm: '${data_folder}verkehrszonen_npvm_8898.csv'
 
  outputs:
   output_folder: '\outputs\parcels2021\'

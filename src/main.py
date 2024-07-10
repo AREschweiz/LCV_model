@@ -26,6 +26,7 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
     min_n_stops_for_2_opt = get_setting(config, 'min_n_stops_for_2_opt', int)
     n_external_zones = get_setting(config, 'n_external_zones', int)
 
+
     # The granularity defines how "big" the modelled agents are.
     # A granularity of 0.1 means that if in reality 100 tours are generated from a zone on a representative day,
     # then 100/0.1= 1000 tours are generated in simulations, each of them counting for 0.1 vehicle equivalent.
@@ -43,6 +44,7 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
     path_tt_matrix = get_input_path(config, 'tt_matrix')
     path_same_zip_matrix = get_input_path(config, 'same_zip_matrix')
     path_zone_stats = get_input_path(config, 'zone_stats')
+    path_zones_npvm_incl_abroad = get_input_path(config, 'all_zones_npvm')
 
     path_params_end_tour = get_input_path(config, 'params_end_tour')
     path_params_next_stop = get_input_path(config, 'params_next_stop')
@@ -71,6 +73,8 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
 
     zone_stats, population, jobs, land_use = get_zone_stats(path_zone_stats, sep)
     n_zones = len(zone_stats.index)
+    zones_npvm_incl_abroad = pd.read_csv(path_zones_npvm_incl_abroad, sep=sep)
+    n_zones_incl_abroad = len(zones_npvm_incl_abroad.index)
 
     tt_matrix, zone_mapping, zone_ids = get_omx_matrix(path_tt_matrix, n_zones, n_external_zones)
     dist_matrix, zone_mapping, zone_ids = get_omx_matrix(path_dist_matrix, n_zones, n_external_zones)
@@ -240,18 +244,19 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
     trip_matrix = 0.5 * trip_matrix + 0.5 * np.transpose(trip_matrix)
 
     #####
-    # Augment the size of the trip matrix to include zones in Liechtenstein as well as Büsingen and Campione d'Italia
+    # Augment the size of the trip matrix to include all zones of npvm, including abroad.
     # (OD pairs filled with zeros)
-    trip_matrix_incl_external = np.zeros((n_zones + n_external_zones, n_zones + n_external_zones), dtype=np.float32)
-    trip_matrix_incl_external[:n_zones, :n_zones] = trip_matrix
+    trip_matrix_8898 = np.zeros((n_zones_incl_abroad, n_zones_incl_abroad), dtype=np.float32)
+    trip_matrix_8898[:n_zones, :n_zones] = trip_matrix
+
 
     # Write the trip matrix in the OMX format, compatible with VISUM
     if write_omx:
         logger.info('Writing trip matrix to .omx...')
 
         myfile = omx.open_file(path_out_trip_matrix_omx, 'w')
-        myfile['Trips'] = trip_matrix_incl_external
-        myfile.create_mapping('NO', list(zone_mapping.keys()))
+        myfile['Trips'] = trip_matrix_8898
+        myfile.create_mapping('NO', zones_npvm_incl_abroad['Nr'].to_list())
         myfile.close()
 
     # Write the trip matrix in the CSV format
@@ -262,8 +267,8 @@ def main(config: Dict[str, Dict[str, Any]], logger: logging.Logger):
         with open(path_out_trip_matrix_csv, 'w') as f:
             f.write(f'orig{sep}dest{sep}n_trips\n')
             for orig in range(n_zones):
-                for dest in np.where(trip_matrix_incl_external[orig, :] > 0)[0]:
-                    n_trips = trip_matrix_incl_external[orig, dest]
+                for dest in np.where(trip_matrix_8898[orig, :] > 0)[0]:
+                    n_trips = trip_matrix_8898[orig, dest]
                     f.write(f'{orig}{sep}{dest}{sep}{n_trips}\n')
 
 
