@@ -20,7 +20,7 @@ segment_files = {
     'C': 'next_stop_location_C',
     'F': 'next_stop_location_F',
     'G': 'next_stop_location_G',
-    'H': 'next_stop_location_H',
+    'H (49-52)': 'next_stop_location_H',
     'N': 'next_stop_location_N',
     'Other': 'next_stop_location_other'
 }

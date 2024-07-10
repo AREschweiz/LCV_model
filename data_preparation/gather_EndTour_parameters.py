@@ -15,7 +15,7 @@ segment_files = { # These should be in the same order as the segments in the con
     'C': 'EndTour_C',
     'F': 'EndTour_F',
     'G': 'EndTour_G',
-    'H': 'EndTour_H (49-52)',
+    'H (49-52)': 'EndTour_H (49-52)',
     'N': 'EndTour_N',
     'Other': 'EndTour_Other'
 }
