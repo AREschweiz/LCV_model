@@ -9,4 +9,4 @@ https://github.com/AREschweiz/LCV_model/blob/main/22064-R01%20-%20Report%20Audit
 
 The results of the models (i.e. the resulting matrices) will be available soon on Zenodo.
 
-Note: in order to apply the model, it is needed to have access to the number of FTE per NOGA Section. This data is not publicly available.
+Note: in order to apply the model, one needs the number of FTE per NOGA Section at the level of the zones of the transport model. This data is not publicly available.
